@@ -13,14 +13,7 @@
             background-color: #f0f4f8;
             user-select: none;
         }
-        .quiz-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            display: none;
-        }
-        .form-container {
+        .container {
             background-color: white;
             padding: 30px;
             border-radius: 15px;
@@ -70,19 +63,22 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="form-container" id="formContainer">
+    <div class="container" id="formContainer">
         <div class="header">Talent Global Recruitment</div>
         <h2>Enter Your Information</h2>
         <p>There are 13 questions, and you have 20 minutes to complete the test. You can go back to change your answers if needed.</p>
         <div class="rules">
-            ⚠️ IMPORTANT: Any attempt to leave this tab, use AI tools, or search engines will result in immediate disqualification.<br>
-            - First violation (tab switching): You will receive a warning.<br>
-            - Second violation: Your test will be automatically submitted.<br>
-            - Copying, pasting, or right-clicking: Immediate disqualification.<br>
-            - Your answers will be automatically saved as you progress.
+            ⚠️ **IMPORTANT:** Any attempt to leave this tab, use AI tools, or search engines will result in immediate disqualification.<br>
+            - **First violation (tab switching):** You will receive a warning.<br>
+            - **Second violation:** Your test will be automatically submitted.<br>
+            - **Copying, pasting, or right-clicking:** Immediate disqualification.<br>
+            - **Your answers will be automatically saved as you progress.**
         </div>
         <form id="userInfoForm">
             <label for="name">Name:</label>
@@ -95,12 +91,13 @@
         </form>
     </div>
 
-    <div class="quiz-container" id="quizContainer">
+    <div class="container hidden" id="quizContainer">
         <div class="timer" id="timer">Time Remaining: 20:00</div>
         <div class="progress">
             <div class="progress-bar" id="progressBar"></div>
         </div>
         <div id="questionContainer"></div>
+        <button id="prevButton" class="hidden">Previous Question</button>
         <button id="nextButton">Next Question</button>
     </div>
 
@@ -120,6 +117,44 @@
             { q: "Anthony is the 15th from left and right. How many students are there?", options: ["15", "25", "29", "30", "31"], correct: "C" },
             { q: "Train’s total length?", options: ["25.6m", "36m", "51.2m", "64.4m", "76.2m"], correct: "C" }
         ];
+
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+
+        document.getElementById("userInfoForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            document.getElementById("formContainer").classList.add("hidden");
+            document.getElementById("quizContainer").classList.remove("hidden");
+            showQuestion();
+        });
+
+        function showQuestion() {
+            const questionContainer = document.getElementById("questionContainer");
+            questionContainer.innerHTML = `
+                <h3>${currentQuestionIndex + 1}. ${questions[currentQuestionIndex].q}</h3>
+                ${questions[currentQuestionIndex].options.map((opt, i) => `
+                    <label><input type="radio" name="q${currentQuestionIndex}" value="${opt}" ${userAnswers[currentQuestionIndex] === opt ? 'checked' : ''}> ${opt}</label><br>
+                `).join("")}
+            `;
+
+            document.getElementById("prevButton").classList.toggle("hidden", currentQuestionIndex === 0);
+            document.getElementById("nextButton").textContent = currentQuestionIndex === questions.length - 1 ? "Submit Test" : "Next Question";
+        }
+
+        document.getElementById("nextButton").addEventListener("click", function() {
+            saveAnswer();
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            }
+        });
+
+        function saveAnswer() {
+            const selected = document.querySelector(`input[name="q${currentQuestionIndex}"]:checked`);
+            if (selected) {
+                userAnswers[currentQuestionIndex] = selected.value;
+            }
+        }
     </script>
 </body>
 </html>
