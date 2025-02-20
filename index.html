@@ -27,6 +27,14 @@
             border-radius: 15px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
         }
+        .rules {
+            background-color: #fff5f5;
+            color: #e53e3e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
         .blurred {
             filter: blur(5px);
         }
@@ -52,7 +60,7 @@
             display: block;
             width: 100%;
             padding: 15px;
-            background-color: #4299e1;
+            background-color: #5d5bff;
             color: white;
             border: none;
             border-radius: 8px;
@@ -60,11 +68,24 @@
             font-size: 16px;
             margin-top: 20px;
         }
+        .header {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="form-container" id="formContainer">
+        <div class="header">Talent Global Recruitment</div>
         <h2>Enter Your Information</h2>
+        <div class="rules">
+            <strong>⚠️ Test Rules:</strong><br>
+            - No tab switching. One warning, then disqualification.<br>
+            - No copying, pasting, or right-clicking. Immediate disqualification.<br>
+            - The test is timed and must be completed in one sitting.<br>
+        </div>
         <form id="userInfoForm">
             <label for="name">Name:</label>
             <input type="text" id="name" required><br><br>
@@ -72,12 +93,11 @@
             <input type="email" id="email" required><br><br>
             <label for="position">Position Applied For:</label>
             <input type="text" id="position" required><br><br>
-            <button type="submit">Start Test</button>
+            <button type="submit">I Understand & Start Test</button>
         </form>
     </div>
 
     <div class="quiz-container" id="quizContainer">
-        <div class="rules">⚠️ No tab switching or AI assistance allowed.</div>
         <div class="timer" id="timer">Time Remaining: 20:00</div>
         <div class="progress">
             <div class="progress-bar" id="progressBar"></div>
@@ -94,6 +114,7 @@
     <script>
         let timeLeft = 1200;
         let isDisqualified = false;
+        let tabSwitchCount = 0;
         let timerInterval;
 
         document.getElementById('userInfoForm').addEventListener('submit', function(event) {
@@ -122,17 +143,21 @@
 
         document.addEventListener("visibilitychange", function() {
             if (document.hidden) {
-                document.getElementById('quizContainer').classList.add('blurred');
-                alert("⚠️ You switched tabs! If you do this again, you will be disqualified.");
-            } else {
-                document.getElementById('quizContainer').classList.remove('blurred');
+                tabSwitchCount++;
+                if (tabSwitchCount >= 2) {
+                    alert("⚠️ You switched tabs again! The test is being submitted.");
+                    document.getElementById('quizForm').submit();
+                } else {
+                    alert("⚠️ You switched tabs! If you do this again, you will be disqualified.");
+                }
             }
         });
 
         ['copy', 'paste', 'cut', 'contextmenu'].forEach(event => {
             document.addEventListener(event, (e) => {
                 e.preventDefault();
-                alert("⚠️ Copy-pasting is not allowed!");
+                alert("⚠️ Copy-pasting is not allowed! You are disqualified.");
+                document.getElementById('quizForm').submit();
             });
         });
     </script>
