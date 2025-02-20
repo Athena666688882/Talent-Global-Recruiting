@@ -18,7 +18,6 @@
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            transition: filter 0.3s;
             display: none;
         }
         .form-container {
@@ -26,17 +25,6 @@
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-        .rules {
-            background-color: #fff5f5;
-            color: #e53e3e;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .blurred {
-            filter: blur(5px);
         }
         .progress {
             width: 100%;
@@ -47,7 +35,7 @@
         }
         .progress-bar {
             height: 100%;
-            background-color: #4299e1;
+            background-color: #5d5bff;
             width: 0%;
             border-radius: 5px;
         }
@@ -80,12 +68,7 @@
     <div class="form-container" id="formContainer">
         <div class="header">Talent Global Recruitment</div>
         <h2>Enter Your Information</h2>
-        <div class="rules">
-            <strong>⚠️ Test Rules:</strong><br>
-            - No tab switching. One warning, then disqualification.<br>
-            - No copying, pasting, or right-clicking. Immediate disqualification.<br>
-            - The test is timed and must be completed in one sitting.<br>
-        </div>
+        <p>There are 13 questions, and you have 20 minutes to complete the test. You can go back to change your answers if needed.</p>
         <form id="userInfoForm">
             <label for="name">Name:</label>
             <input type="text" id="name" required><br><br>
@@ -102,22 +85,30 @@
         <div class="progress">
             <div class="progress-bar" id="progressBar"></div>
         </div>
-        <form id="quizForm">
-            <div class="question">
-                <h3>1. The odometer is to mileage as the compass is to:</h3>
-                <label><input type="radio" name="q1" value="A"> Speed</label>
-                <label><input type="radio" name="q1" value="B"> Hiking</label>
-                <label><input type="radio" name="q1" value="C"> Needle</label>
-                <label><input type="radio" name="q1" value="D"> Direction</label>
-            </div>
-            <button type="submit">Submit Test</button>
-        </form>
+        <div id="questionContainer"></div>
+        <button id="nextButton">Next Question</button>
     </div>
 
     <script>
+        const questions = [
+            { q: "The odometer is to mileage as the compass is to:", options: ["Speed", "Hiking", "Needle", "Direction"], correct: "D" },
+            { q: "Microphone: Loud :: Microscope : ?", options: ["Discover", "Magnify", "See", "Examine"], correct: "B" },
+            { q: "Melt: Liquid :: Freeze : ?", options: ["Solid", "Evaporation", "Water", "Condense"], correct: "A" },
+            { q: "School: Student :: Hospital : ?", options: ["Patient", "Doctor", "Nurse", "Medicine"], correct: "A" },
+            { q: "Binding: Book :: ?", options: ["Display: Museum", "Artist: Carpenter", "Nail: Hammer", "Frame: Picture"], correct: "D" },
+            { q: "If all A are B, and all B are C, then all A are definitely C. This statement is:", options: ["True", "False", "Neither"], correct: "A" },
+            { q: "Each letter represents a unique face of a cube. Which letter is on the face opposite B?", options: ["A", "C", "D", "E", "F"], correct: "F" },
+            { q: "Which of these boxes can be formed by folding the cardboard?", options: ["A", "B", "C", "D"], correct: "B" },
+            { q: "Which is the best comparison?", options: ["A", "B", "C", "D", "E"], correct: "E" },
+            { q: "Which box can be formed by folding the cardboard?", options: ["A", "B", "C", "D"], correct: "B" },
+            { q: "Which one is different from the others?", options: ["A", "B", "C", "D", "E"], correct: "C" },
+            { q: "Anthony is the 15th from left and right. How many students are there?", options: ["15", "25", "29", "30", "31"], correct: "C" },
+            { q: "Train’s total length?", options: ["25.6m", "36m", "51.2m", "64.4m", "76.2m"], correct: "C" }
+        ];
+
         let timeLeft = 1200;
-        let isDisqualified = false;
-        let tabSwitchCount = 0;
+        let currentQuestion = 0;
+        let answers = {};
         let timerInterval;
 
         document.getElementById('userInfoForm').addEventListener('submit', function(event) {
@@ -125,44 +116,21 @@
             document.getElementById('formContainer').style.display = 'none';
             document.getElementById('quizContainer').style.display = 'block';
             startTimer();
+            loadQuestion();
         });
 
-        function startTimer() {
-            timerInterval = setInterval(updateTimer, 1000);
-        }
-
-        function updateTimer() {
-            if (!isDisqualified) {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                document.getElementById('timer').textContent = `Time Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    document.getElementById('quizForm').submit();
-                }
-                timeLeft--;
-            }
-        }
-
-        document.addEventListener("visibilitychange", function() {
-            if (document.hidden) {
-                tabSwitchCount++;
-                if (tabSwitchCount >= 2) {
-                    alert("⚠️ You switched tabs again! The test is being submitted.");
-                    document.getElementById('quizForm').submit();
-                } else {
-                    alert("⚠️ You switched tabs! If you do this again, you will be disqualified.");
-                }
-            }
-        });
-
-        ['copy', 'paste', 'cut', 'contextmenu'].forEach(event => {
-            document.addEventListener(event, (e) => {
-                e.preventDefault();
-                alert("⚠️ Copy-pasting is not allowed! You are disqualified.");
-                document.getElementById('quizForm').submit();
+        function loadQuestion() {
+            const container = document.getElementById('questionContainer');
+            container.innerHTML = `<h3>${currentQuestion + 1}. ${questions[currentQuestion].q}</h3>`;
+            questions[currentQuestion].options.forEach((option, index) => {
+                const optionValue = String.fromCharCode(65 + index);
+                container.innerHTML += `<label><input type="radio" name="q${currentQuestion}" value="${optionValue}" ${answers[currentQuestion] === optionValue ? 'checked' : ''} onclick="saveAnswer(${currentQuestion}, '${optionValue}')"> ${option}</label><br>`;
             });
-        });
+        }
+
+        function saveAnswer(questionIndex, answer) {
+            answers[questionIndex] = answer;
+        }
     </script>
 </body>
 </html>
