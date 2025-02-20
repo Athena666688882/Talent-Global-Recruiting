@@ -31,6 +31,7 @@
             background-color: #5d5bff;
             width: 0%;
             border-radius: 5px;
+            transition: width 0.3s ease;
         }
         .timer {
             text-align: right;
@@ -65,6 +66,21 @@
         }
         .hidden {
             display: none;
+        }
+        .submission-message {
+            text-align: center;
+            font-size: 18px;
+            color: #2d3748;
+            margin-top: 20px;
+        }
+        .warning-message {
+            background-color: #fff5f5;
+            color: #e53e3e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
         }
     </style>
 </head>
@@ -101,6 +117,11 @@
         <button id="nextButton">Next Question</button>
     </div>
 
+    <div class="container hidden" id="submissionContainer">
+        <div class="header">Test Submitted Successfully!</div>
+        <div class="submission-message" id="submissionMessage"></div>
+    </div>
+
     <script>
         const questions = [
             { q: "The odometer is to mileage as the compass is to:", options: ["Speed", "Hiking", "Needle", "Direction"], correct: "D" },
@@ -120,13 +141,36 @@
 
         let currentQuestionIndex = 0;
         let userAnswers = {};
+        let timeRemaining = 20 * 60; // 20 minutes in seconds
+        let timerInterval;
+        let tabSwitchCount = 0;
 
         document.getElementById("userInfoForm").addEventListener("submit", function(event) {
             event.preventDefault();
             document.getElementById("formContainer").classList.add("hidden");
             document.getElementById("quizContainer").classList.remove("hidden");
+            startTimer();
             showQuestion();
+            updateProgressBar();
+            setupAntiCheatMeasures();
         });
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitTest("auto");
+                }
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById("timer").textContent = `Time Remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
 
         function showQuestion() {
             const questionContainer = document.getElementById("questionContainer");
@@ -139,13 +183,28 @@
 
             document.getElementById("prevButton").classList.toggle("hidden", currentQuestionIndex === 0);
             document.getElementById("nextButton").textContent = currentQuestionIndex === questions.length - 1 ? "Submit Test" : "Next Question";
+            updateProgressBar();
         }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById("progressBar").style.width = `${progress}%`;
+        }
+
+        document.getElementById("prevButton").addEventListener("click", function() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        });
 
         document.getElementById("nextButton").addEventListener("click", function() {
             saveAnswer();
             if (currentQuestionIndex < questions.length - 1) {
                 currentQuestionIndex++;
                 showQuestion();
+            } else {
+                submitTest("manual");
             }
         });
 
@@ -154,6 +213,56 @@
             if (selected) {
                 userAnswers[currentQuestionIndex] = selected.value;
             }
+        }
+
+        function submitTest(mode) {
+            clearInterval(timerInterval);
+            document.getElementById("quizContainer").classList.add("hidden");
+            document.getElementById("submissionContainer").classList.remove("hidden");
+
+            let submissionMessage = "";
+            if (mode === "manual") {
+                submissionMessage = `
+                    <p>Your test has been submitted. Thank you for completing the assessment!</p>
+                    <p>You will be moved forward with an interview if selected for the next step.</p>
+                `;
+            } else if (mode === "auto") {
+                submissionMessage = `
+                    <p>Time is up! Your test has been automatically submitted.</p>
+                    <p>Thank you for completing the assessment! You will be moved forward with an interview if selected for the next step.</p>
+                `;
+            }
+            document.getElementById("submissionMessage").innerHTML = submissionMessage;
+        }
+
+        function setupAntiCheatMeasures() {
+            // Detect tab switching
+            window.addEventListener("blur", () => {
+                tabSwitchCount++;
+                if (tabSwitchCount === 1) {
+                    alert("⚠️ We noticed you switched tabs. Please keep the test window open to maintain the integrity of the assessment. If this happens again, your test will be automatically submitted.");
+                } else if (tabSwitchCount === 2) {
+                    alert("⚠️ You switched tabs again. To ensure fairness, your test is now being submitted. Thank you for your time.");
+                    submitTest("auto");
+                }
+            });
+
+            // Detect copy-pasting, cutting, or right-clicking
+            document.addEventListener("copy", (e) => {
+                e.preventDefault();
+                alert("⚠️ For security reasons, copying and pasting is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
+                submitTest("auto");
+            });
+            document.addEventListener("cut", (e) => {
+                e.preventDefault();
+                alert("⚠️ For security reasons, cutting is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
+                submitTest("auto");
+            });
+            document.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                alert("⚠️ For security reasons, right-clicking is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
+                submitTest("auto");
+            });
         }
     </script>
 </body>
