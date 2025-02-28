@@ -236,21 +236,19 @@
                 score: score,
             };
 
-            // Send data to Google Apps Script
-            fetch("https://script.google.com/macros/s/AKfycbxA1Mm4t0hdgkoE2BVzW-Au7DTPHAAaZh7AHfBNeMrplpuhpcKuOzhwgaoRrfwG49iT/exec", {
-                method: "POST",
-                body: JSON.stringify(formData),
-                headers: {
-                    "Content-Type": "application/json",
-                },
+            // Send data to Google Apps Script via GET request
+            const url = new URL("https://script.google.com/macros/s/AKfycbwULN5ItWXaXtpfwBYuBeTpHXvItx8kSUEadlGKEVa9Dcu6kQ5ynvErIeppsDKCgb2J/exec");
+            url.searchParams.append("name", formData.name);
+            url.searchParams.append("email", formData.email);
+            url.searchParams.append("position", formData.position);
+            url.searchParams.append("score", formData.score);
+
+            fetch(url, {
+                method: "GET",
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    if (data.success) {
-                        console.log("Data successfully sent to Google Sheet!");
-                    } else {
-                        console.error("Failed to send data to Google Sheet.");
-                    }
+                    console.log("Response from Google Apps Script:", data);
                 })
                 .catch((error) => {
                     console.error("Error:", error);
