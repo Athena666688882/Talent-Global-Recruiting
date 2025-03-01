@@ -64,6 +64,32 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
+        .rules-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #e53e3e;
+        }
+        .rules-list {
+            list-style-type: none; /* Remove default bullet points */
+            padding-left: 20px; /* Add padding to align custom bullets */
+            margin: 0;
+        }
+        .rules-list li {
+            margin-bottom: 10px;
+            padding-left: 10px; /* Adjust padding for better alignment */
+            position: relative;
+            color: #e53e3e;
+        }
+        .rules-list li::before {
+            content: "•";
+            color: #e53e3e;
+            font-weight: bold;
+            display: inline-block;
+            width: 10px; /* Reduce width for better alignment */
+            margin-left: -10px; /* Adjust margin to align bullets */
+            position: absolute;
+            left: 0;
+        }
         .hidden {
             display: none;
         }
@@ -90,11 +116,14 @@
         <h2>Enter Your Information</h2>
         <p>There are 13 questions, and you have 20 minutes to complete the test. You can go back to change your answers if needed.</p>
         <div class="rules">
-            ⚠️ **IMPORTANT:** Any attempt to leave this tab, use AI tools, or search engines will result in immediate disqualification.<br>
-            - **First violation (tab switching):** You will receive a warning.<br>
-            - **Second violation:** Your test will be automatically submitted.<br>
-            - **Copying, pasting, or right-clicking:** Immediate disqualification.<br>
-            - **Your answers will be automatically saved as you progress.**
+            <div class="rules-header">⚠️ IMPORTANT:</div>
+            <ul class="rules-list">
+                <li>Any attempt to leave this tab, use AI tools, or search engines will result in immediate disqualification.</li>
+                <li>First violation (tab switching): You will receive a warning.</li>
+                <li>Second violation: Your test will be automatically submitted.</li>
+                <li>Copying, pasting, or right-clicking: Immediate disqualification.</li>
+                <li>Your answers will be automatically saved as you progress.</li>
+            </ul>
         </div>
         <form id="userInfoForm">
             <label for="name">Name:</label>
