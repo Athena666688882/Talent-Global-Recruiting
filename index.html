@@ -70,13 +70,13 @@
             color: #e53e3e;
         }
         .rules-list {
-            list-style-type: none; /* Remove default bullet points */
-            padding-left: 20px; /* Add padding to align custom bullets */
+            list-style-type: none;
+            padding-left: 20px;
             margin: 0;
         }
         .rules-list li {
             margin-bottom: 10px;
-            padding-left: 10px; /* Adjust padding for better alignment */
+            padding-left: 10px;
             position: relative;
             color: #e53e3e;
         }
@@ -85,8 +85,8 @@
             color: #e53e3e;
             font-weight: bold;
             display: inline-block;
-            width: 10px; /* Reduce width for better alignment */
-            margin-left: -10px; /* Adjust margin to align bullets */
+            width: 10px;
+            margin-left: -10px;
             position: absolute;
             left: 0;
         }
@@ -159,46 +159,13 @@
             { q: "School: Student :: Hospital : ?", options: ["Patient", "Doctor", "Nurse", "Medicine"], correct: "A" },
             { q: "Binding: Book :: ?", options: ["Display: Museum", "Artist: Carpenter", "Nail: Hammer", "Frame: Picture"], correct: "D" },
             { q: "If all A are B, and all B are C, then all A are definitely C. This statement is:", options: ["True", "False", "Neither"], correct: "A" },
-            { 
-                q: "Each letter represents a unique face of a cube. Which letter is on the face opposite B?",
-                options: ["A", "C", "D", "E", "F"],
-                correct: "F",
-                image: "https://i.imgur.com/xNsvqzx.png" // Image for Question 7
-            },
-            { 
-                q: "Which box below can be formed by folding the piece of cardboard on the left?",
-                options: ["A", "B", "C", "D"],
-                correct: "B",
-                image: "https://i.imgur.com/wqLulY1.png" // Image for Question 8
-            },
-            { 
-                q: "Which of the following five answers can be placed after the second 'to' on the right (the best comparison)?",
-                options: ["A", "B", "C", "D", "E"],
-                correct: "E",
-                image: "https://i.imgur.com/5I7C8lv.png" // Image for Question 9
-            },
-            { 
-                q: "Which of the boxes below can be formed by folding the piece of cardboard on the left?",
-                options: ["A", "B", "C", "D"],
-                correct: "B",
-                image: "https://i.imgur.com/7Bp4rxy.png" // Image for Question 10
-            },
-            { 
-                q: "Which one is different from the others?",
-                options: ["A", "B", "C", "D", "E"],
-                correct: "C",
-                image: "https://i.imgur.com/h6oMoiV.png" // Image for Question 11
-            },
-            { 
-                q: "The entire class is lined up in a row. Anthony is the 15th from the left and also the 15th from the right. How many students are there in total in the class?",
-                options: ["15", "25", "29", "30", "31"],
-                correct: "C"
-            },
-            { 
-                q: "The length of the train's caboose (rear car) is 6.4 meters; the length of the locomotive equals the length of the caboose plus half the length of a car. The length of a car equals the length of the caboose plus the length of the locomotive. What is the total length of the train's locomotive, car, and caboose?",
-                options: ["25.6m", "36m", "51.2m", "64.4m", "76.2m"],
-                correct: "C"
-            }
+            { q: "Each letter represents a unique face of a cube. Which letter is on the face opposite B?", options: ["A", "C", "D", "E", "F"], correct: "F", image: "https://i.imgur.com/xNsvqzx.png" },
+            { q: "Which box below can be formed by folding the piece of cardboard on the left?", options: ["A", "B", "C", "D"], correct: "B", image: "https://i.imgur.com/wqLulY1.png" },
+            { q: "Which of the following five answers can be placed after the second 'to' on the right (the best comparison)?", options: ["A", "B", "C", "D", "E"], correct: "E", image: "https://i.imgur.com/5I7C8lv.png" },
+            { q: "Which of the boxes below can be formed by folding the piece of cardboard on the left?", options: ["A", "B", "C", "D"], correct: "B", image: "https://i.imgur.com/7Bp4rxy.png" },
+            { q: "Which one is different from the others?", options: ["A", "B", "C", "D", "E"], correct: "C", image: "https://i.imgur.com/h6oMoiV.png" },
+            { q: "The entire class is lined up in a row. Anthony is the 15th from the left and also the 15th from the right. How many students are there in total in the class?", options: ["15", "25", "29", "30", "31"], correct: "C" },
+            { q: "The length of the train's caboose (rear car) is 6.4 meters; the length of the locomotive equals the length of the caboose plus half the length of a car. The length of a car equals the length of the caboose plus the length of the locomotive. What is the total length of the train's locomotive, car, and caboose?", options: ["25.6m", "36m", "51.2m", "64.4m", "76.2m"], correct: "C" }
         ];
 
         let currentQuestionIndex = 0;
@@ -238,10 +205,8 @@
             const questionContainer = document.getElementById("questionContainer");
             const question = questions[currentQuestionIndex];
 
-            // Build the question HTML
             let questionHTML = `<h3>${currentQuestionIndex + 1}. ${question.q}</h3>`;
 
-            // Add the image if it exists (between the question and options)
             if (question.image) {
                 questionHTML += `
                     <div style="text-align: center; margin: 20px 0;">
@@ -250,14 +215,12 @@
                 `;
             }
 
-            // Add the options
             questionHTML += question.options.map((opt, i) => `
                 <label><input type="radio" name="q${currentQuestionIndex}" value="${opt}" ${userAnswers[currentQuestionIndex] === opt ? 'checked' : ''}> ${opt}</label><br>
             `).join("");
 
             questionContainer.innerHTML = questionHTML;
 
-            // Update navigation buttons
             document.getElementById("prevButton").classList.toggle("hidden", currentQuestionIndex === 0);
             document.getElementById("nextButton").textContent = currentQuestionIndex === questions.length - 1 ? "Submit Test" : "Next Question";
             updateProgressBar();
@@ -297,7 +260,6 @@
             document.getElementById("quizContainer").classList.add("hidden");
             document.getElementById("submissionContainer").classList.remove("hidden");
 
-            // Calculate the score
             let score = 0;
             for (let i = 0; i < questions.length; i++) {
                 if (userAnswers[i] === questions[i].options[questions[i].correct.charCodeAt(0) - 65]) {
@@ -305,7 +267,6 @@
                 }
             }
 
-            // Prepare data to send to Google Sheet
             const formData = {
                 name: document.getElementById("name").value,
                 email: document.getElementById("email").value,
@@ -313,8 +274,7 @@
                 score: score,
             };
 
-            // Send data to Google Apps Script via GET request
-            const url = new URL("https://script.google.com/macros/s/AKfycbxA1Mm4t0hdgkoE2BVzW-Au7DTPHAAaZh7AHfBNeMrplpuhpcKuOzhwgaoRrfwG49iT/exec");
+            const url = new URL("https://script.google.com/macros/s/AKfycbzYbCar5rUoDUssgowKzZ9h_uMTsOi6czybNqhYL-hM6VCfxNpbibUvRrZa1kIJFx4q/exec");
             url.searchParams.append("name", formData.name);
             url.searchParams.append("email", formData.email);
             url.searchParams.append("position", formData.position);
@@ -326,12 +286,16 @@
                 .then((response) => response.json())
                 .then((data) => {
                     console.log("Response from Google Apps Script:", data);
+                    if (data.result === "Success") {
+                        console.log("Data saved successfully!");
+                    } else {
+                        console.error("Error saving data:", data.error);
+                    }
                 })
                 .catch((error) => {
-                    console.error("Error:", error);
+                    console.error("Fetch error:", error);
                 });
 
-            // Display submission message
             let submissionMessage = "";
             if (mode === "manual") {
                 submissionMessage = `
@@ -348,7 +312,6 @@
         }
 
         function setupAntiCheatMeasures() {
-            // Detect tab switching
             window.addEventListener("blur", () => {
                 tabSwitchCount++;
                 if (tabSwitchCount === 1) {
@@ -359,7 +322,6 @@
                 }
             });
 
-            // Detect copy-pasting, cutting, or right-clicking
             document.addEventListener("copy", (e) => {
                 e.preventDefault();
                 alert("⚠️ For security reasons, copying and pasting is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
