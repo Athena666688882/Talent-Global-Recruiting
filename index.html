@@ -261,9 +261,17 @@
             document.getElementById("submissionContainer").classList.remove("hidden");
 
             let score = 0;
+            let questionResults = {}; // Object to store results for each question
+
+            // Check each question and store whether it’s correct or wrong
             for (let i = 0; i < questions.length; i++) {
-                if (userAnswers[i] === questions[i].options[questions[i].correct.charCodeAt(0) - 65]) {
+                const userAnswer = userAnswers[i];
+                const correctAnswer = questions[i].options[questions[i].correct.charCodeAt(0) - 65]; // Convert letter to index (A=0, B=1, etc.)
+                if (userAnswer === correctAnswer) {
                     score++;
+                    questionResults[`Q${i + 1}`] = "Correct";
+                } else {
+                    questionResults[`Q${i + 1}`] = "Wrong";
                 }
             }
 
@@ -272,13 +280,41 @@
                 email: document.getElementById("email").value,
                 position: document.getElementById("position").value,
                 score: score,
+                // Add question results for Q1 to Q13
+                Q1: questionResults.Q1 || "Wrong", // Default to "Wrong" if no answer
+                Q2: questionResults.Q2 || "Wrong",
+                Q3: questionResults.Q3 || "Wrong",
+                Q4: questionResults.Q4 || "Wrong",
+                Q5: questionResults.Q5 || "Wrong",
+                Q6: questionResults.Q6 || "Wrong",
+                Q7: questionResults.Q7 || "Wrong",
+                Q8: questionResults.Q8 || "Wrong",
+                Q9: questionResults.Q9 || "Wrong",
+                Q10: questionResults.Q10 || "Wrong",
+                Q11: questionResults.Q11 || "Wrong",
+                Q12: questionResults.Q12 || "Wrong",
+                Q13: questionResults.Q13 || "Wrong"
             };
 
-            const url = new URL("https://script.google.com/macros/s/AKfycbzYbCar5rUoDUssgowKzZ9h_uMTsOi6czybNqhYL-hM6VCfxNpbibUvRrZa1kIJFx4q/exec");
+            const url = new URL("https://script.google.com/macros/s/AKfycbwM3WOt5UdpA3FneouI8QZ3EfFER-ExKYUXmfcWSkkGLjQWD0QeK4P4PNqGjsCcZfUE/exec");
             url.searchParams.append("name", formData.name);
             url.searchParams.append("email", formData.email);
             url.searchParams.append("position", formData.position);
             url.searchParams.append("score", formData.score);
+            // Append question results to the URL
+            url.searchParams.append("Q1", formData.Q1);
+            url.searchParams.append("Q2", formData.Q2);
+            url.searchParams.append("Q3", formData.Q3);
+            url.searchParams.append("Q4", formData.Q4);
+            url.searchParams.append("Q5", formData.Q5);
+            url.searchParams.append("Q6", formData.Q6);
+            url.searchParams.append("Q7", formData.Q7);
+            url.searchParams.append("Q8", formData.Q8);
+            url.searchParams.append("Q9", formData.Q9);
+            url.searchParams.append("Q10", formData.Q10);
+            url.searchParams.append("Q11", formData.Q11);
+            url.searchParams.append("Q12", formData.Q12);
+            url.searchParams.append("Q13", formData.Q13);
 
             fetch(url, {
                 method: "GET",
