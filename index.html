@@ -108,6 +108,42 @@
             font-size: 14px;
             text-align: center;
         }
+        /* Popup Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            width: 48%;
+            padding: 10px;
+            margin: 0;
+        }
+        #proceedButton {
+            background-color: #5d5bff;
+        }
+        #cancelButton {
+            background-color: #e53e3e;
+        }
     </style>
 </head>
 <body>
@@ -151,6 +187,17 @@
         <div class="submission-message" id="submissionMessage"></div>
     </div>
 
+    <!-- Popup Modal -->
+    <div class="modal" id="testConditionsModal">
+        <div class="modal-content">
+            <p>The camera and audio will be activated for randomly selected applicants during the test process.</p>
+            <div class="modal-buttons">
+                <button id="proceedButton">I acknowledge this test setting</button>
+                <button id="cancelButton">I don’t want to proceed</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const questions = [
             { q: "The odometer is to mileage as the compass is to:", options: ["Speed", "Hiking", "Needle", "Direction"], correct: "D" },
@@ -176,12 +223,24 @@
 
         document.getElementById("userInfoForm").addEventListener("submit", function(event) {
             event.preventDefault();
+            // Show the popup instead of starting the test immediately
+            document.getElementById("testConditionsModal").style.display = "flex";
+        });
+
+        // Popup button actions
+        document.getElementById("proceedButton").addEventListener("click", function() {
+            document.getElementById("testConditionsModal").style.display = "none";
             document.getElementById("formContainer").classList.add("hidden");
             document.getElementById("quizContainer").classList.remove("hidden");
             startTimer();
             showQuestion();
             updateProgressBar();
             setupAntiCheatMeasures();
+        });
+
+        document.getElementById("cancelButton").addEventListener("click", function() {
+            document.getElementById("testConditionsModal").style.display = "none";
+            submitTest("cancel");
         });
 
         function startTimer() {
@@ -258,19 +317,26 @@
         function submitTest(mode) {
             clearInterval(timerInterval);
             document.getElementById("quizContainer").classList.add("hidden");
+            document.getElementById("formContainer").classList.add("hidden"); // Ensure form is hidden too
             document.getElementById("submissionContainer").classList.remove("hidden");
 
             let score = 0;
-            let questionResults = {}; // Object to store results for each question
+            let questionResults = {};
 
-            // Check each question and store whether it’s correct or wrong
-            for (let i = 0; i < questions.length; i++) {
-                const userAnswer = userAnswers[i];
-                const correctAnswer = questions[i].options[questions[i].correct.charCodeAt(0) - 65]; // Convert letter to index (A=0, B=1, etc.)
-                if (userAnswer === correctAnswer) {
-                    score++;
-                    questionResults[`Q${i + 1}`] = "Correct";
-                } else {
+            if (mode !== "cancel") {
+                for (let i = 0; i < questions.length; i++) {
+                    const userAnswer = userAnswers[i];
+                    const correctAnswer = questions[i].options[questions[i].correct.charCodeAt(0) - 65];
+                    if (userAnswer === correctAnswer) {
+                        score++;
+                        questionResults[`Q${i + 1}`] = "Correct";
+                    } else {
+                        questionResults[`Q${i + 1}`] = "Wrong";
+                    }
+                }
+            } else {
+                // If canceled, set all questions to "Wrong" and score to 0
+                for (let i = 0; i < questions.length; i++) {
                     questionResults[`Q${i + 1}`] = "Wrong";
                 }
             }
@@ -280,8 +346,7 @@
                 email: document.getElementById("email").value,
                 position: document.getElementById("position").value,
                 score: score,
-                // Add question results for Q1 to Q13
-                Q1: questionResults.Q1 || "Wrong", // Default to "Wrong" if no answer
+                Q1: questionResults.Q1 || "Wrong",
                 Q2: questionResults.Q2 || "Wrong",
                 Q3: questionResults.Q3 || "Wrong",
                 Q4: questionResults.Q4 || "Wrong",
@@ -301,7 +366,6 @@
             url.searchParams.append("email", formData.email);
             url.searchParams.append("position", formData.position);
             url.searchParams.append("score", formData.score);
-            // Append question results to the URL
             url.searchParams.append("Q1", formData.Q1);
             url.searchParams.append("Q2", formData.Q2);
             url.searchParams.append("Q3", formData.Q3);
@@ -342,6 +406,11 @@
                 submissionMessage = `
                     <p>Time is up! Your test has been automatically submitted.</p>
                     <p>Thank you for completing the assessment! You will be moved forward with an interview if selected for the next step.</p>
+                `;
+            } else if (mode === "cancel") {
+                submissionMessage = `
+                    <p>You have chosen not to proceed with the test. Your application has been submitted without completing the assessment.</p>
+                    <p>Thank you for your interest in Talent Global Recruitment.</p>
                 `;
             }
             document.getElementById("submissionMessage").innerHTML = submissionMessage;
