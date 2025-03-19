@@ -150,7 +150,7 @@
     <div class="container" id="formContainer">
         <div class="header">Talent Global Recruitment</div>
         <h2>Enter Your Information</h2>
-        <p>There are 13 questions, and you have 20 minutes to complete the test. You can go back to change your answers if needed.</p>
+        <p>There are 13 questions, and you have 20 minutes to complete the test. You can't go back to change your answers.</p>
         <div class="rules">
             <div class="rules-header">⚠️ IMPORTANT:</div>
             <ul class="rules-list">
@@ -164,7 +164,7 @@
         <form id="userInfoForm">
             <label for="name">Name:</label>
             <input type="text" id="name" required><br><br>
-            <label for="email">Email:</label>
+            <label for="email">Email (use the same email as the one provided in the application form):</label>
             <input type="email" id="email" required><br><br>
             <label for="position">Position Applied For:</label>
             <input type="text" id="position" required><br><br>
@@ -178,7 +178,6 @@
             <div class="progress-bar" id="progressBar"></div>
         </div>
         <div id="questionContainer"></div>
-        <button id="prevButton" class="hidden">Previous Question</button>
         <button id="nextButton">Next Question</button>
     </div>
 
@@ -190,7 +189,7 @@
     <!-- Popup Modal -->
     <div class="modal" id="testConditionsModal">
         <div class="modal-content">
-            <p>The camera and audio will be activated for randomly selected applicants during the test process.</p>
+            <p>The camera and audio will be activated for randomly selected applicants during the test process. You only have one chance to complete the test. If you close the window, your assessment will be automatically submitted.</p>
             <div class="modal-buttons">
                 <button id="proceedButton">I acknowledge this test setting</button>
                 <button id="cancelButton">I don’t want to proceed</button>
@@ -223,11 +222,9 @@
 
         document.getElementById("userInfoForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            // Show the popup instead of starting the test immediately
             document.getElementById("testConditionsModal").style.display = "flex";
         });
 
-        // Popup button actions
         document.getElementById("proceedButton").addEventListener("click", function() {
             document.getElementById("testConditionsModal").style.display = "none";
             document.getElementById("formContainer").classList.add("hidden");
@@ -280,7 +277,6 @@
 
             questionContainer.innerHTML = questionHTML;
 
-            document.getElementById("prevButton").classList.toggle("hidden", currentQuestionIndex === 0);
             document.getElementById("nextButton").textContent = currentQuestionIndex === questions.length - 1 ? "Submit Test" : "Next Question";
             updateProgressBar();
         }
@@ -289,13 +285,6 @@
             const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
             document.getElementById("progressBar").style.width = `${progress}%`;
         }
-
-        document.getElementById("prevButton").addEventListener("click", function() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                showQuestion();
-            }
-        });
 
         document.getElementById("nextButton").addEventListener("click", function() {
             saveAnswer();
@@ -317,7 +306,7 @@
         function submitTest(mode) {
             clearInterval(timerInterval);
             document.getElementById("quizContainer").classList.add("hidden");
-            document.getElementById("formContainer").classList.add("hidden"); // Ensure form is hidden too
+            document.getElementById("formContainer").classList.add("hidden");
             document.getElementById("submissionContainer").classList.remove("hidden");
 
             let score = 0;
@@ -335,7 +324,6 @@
                     }
                 }
             } else {
-                // If canceled, set all questions to "Wrong" and score to 0
                 for (let i = 0; i < questions.length; i++) {
                     questionResults[`Q${i + 1}`] = "Wrong";
                 }
@@ -404,7 +392,7 @@
                 `;
             } else if (mode === "auto") {
                 submissionMessage = `
-                    <p>Time is up! Your test has been automatically submitted.</p>
+                    <p>Time is up or the window was closed! Your test has been automatically submitted.</p>
                     <p>Thank you for completing the assessment! You will be moved forward with an interview if selected for the next step.</p>
                 `;
             } else if (mode === "cancel") {
@@ -441,6 +429,13 @@
                 e.preventDefault();
                 alert("⚠️ For security reasons, right-clicking is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
                 submitTest("auto");
+            });
+
+            window.addEventListener("beforeunload", (e) => {
+                if (!document.getElementById("quizContainer").classList.contains("hidden")) {
+                    submitTest("auto");
+                }
+                e.returnValue = "Your test will be submitted if you close the window. Are you sure?";
             });
         }
     </script>
