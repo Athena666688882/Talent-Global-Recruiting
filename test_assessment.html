@@ -77,7 +77,8 @@
     </div>
 
     <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt5KaDFHtHUralareiuRN25c1ucYXCLbuz7ldE43GJDBqUVskP2Wqm5FH14WYMyNVMog/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt5KaDFHtHUralareiuRN25c1ucYXCLbuz7ldE43GJDBqUVskP2Wqm5FH14WYMyNVMog/exec";
+
         const questions = [
             { q: "The odometer is to mileage as the compass is to:", options: ["Speed", "Hiking", "Needle", "Direction"], correct: "D" },
             { q: "Microphone: Loud :: Microscope : ?", options: ["Discover", "Magnify", "See", "Examine"], correct: "B" },
@@ -103,12 +104,13 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt5KaDFHtHUral
         document.getElementById("userInfoForm").addEventListener("submit", function(event) {
             event.preventDefault();
             const email = document.getElementById("email").value.trim();
-            const checkUrl = new URL(APPS_SCRIPT_URL);
-            checkUrl.searchParams.append("action", "checkAuthorized");
-            checkUrl.searchParams.append("email", email);
+
             const callbackName = 'jsonp_' + Date.now();
             const script = document.createElement('script');
-            checkUrl.searchParams.append("callback", callbackName);
+            const url = new URL(APPS_SCRIPT_URL);
+            url.searchParams.append("action", "checkAuthorized");
+            url.searchParams.append("email", email);
+            url.searchParams.append("callback", callbackName);
 
             window[callbackName] = function(data) {
                 document.head.removeChild(script);
@@ -130,8 +132,8 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt5KaDFHtHUral
                 alert("⚠️ Could not verify your email. Please check your connection and try again.");
             };
 
-            script.src = checkUrl.toString();
-            document.head.appendChild(script);;
+            script.src = url.toString();
+            document.head.appendChild(script);
         });
 
         document.getElementById("proceedButton").addEventListener("click", function() {
@@ -207,11 +209,20 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt5KaDFHtHUral
             for (let i = 1; i <= 13; i++) url.searchParams.append(`Q${i}`, questionResults[`Q${i}`] || "Wrong");
             fetch(url).catch(() => {});
 
-            if (mode !== "cancel") {
+            if (mode !== "cancel" && !window.alreadyRecorded) {
+                window.alreadyRecorded = true;
+                const callbackName = 'jsonp_record_' + Date.now();
+                const recordScript = document.createElement('script');
                 const recordUrl = new URL(APPS_SCRIPT_URL);
                 recordUrl.searchParams.append("action", "recordEmail");
                 recordUrl.searchParams.append("email", document.getElementById("email").value.trim());
-                fetch(recordUrl).catch(() => {});
+                recordUrl.searchParams.append("callback", callbackName);
+                window[callbackName] = function() {
+                    document.head.removeChild(recordScript);
+                    delete window[callbackName];
+                };
+                recordScript.src = recordUrl.toString();
+                document.head.appendChild(recordScript);
             }
 
             let msg = "";
