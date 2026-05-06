@@ -106,20 +106,32 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt5KaDFHtHUral
             const checkUrl = new URL(APPS_SCRIPT_URL);
             checkUrl.searchParams.append("action", "checkAuthorized");
             checkUrl.searchParams.append("email", email);
-            fetch(checkUrl)
-                .then(r => r.json())
-                .then(data => {
-                    if (data.result === "authorized") {
-                        document.getElementById("testConditionsModal").style.display = "flex";
-                    } else if (data.reason === "already_taken") {
-                        alert("⚠️ This email has already completed the assessment. Each candidate can only take the test once.");
-                    } else if (data.reason === "not_authorized") {
-                        alert("⚠️ Your email is not authorized to take this assessment. Please make sure you are using the email address provided in your application.");
-                    } else {
-                        alert("⚠️ An error occurred. Please try again or contact support.");
-                    }
-                })
-                .catch(() => alert("⚠️ Could not verify your email. Please check your connection and try again."));
+            const callbackName = 'jsonp_' + Date.now();
+            const script = document.createElement('script');
+            checkUrl.searchParams.append("callback", callbackName);
+
+            window[callbackName] = function(data) {
+                document.head.removeChild(script);
+                delete window[callbackName];
+                if (data.result === "authorized") {
+                    document.getElementById("testConditionsModal").style.display = "flex";
+                } else if (data.reason === "already_taken") {
+                    alert("⚠️ This email has already completed the assessment. Each candidate can only take the test once.");
+                } else if (data.reason === "not_authorized") {
+                    alert("⚠️ Your email is not authorized to take this assessment. Please make sure you are using the email address provided in your application.");
+                } else {
+                    alert("⚠️ An error occurred. Please try again or contact support.");
+                }
+            };
+
+            script.onerror = function() {
+                document.head.removeChild(script);
+                delete window[callbackName];
+                alert("⚠️ Could not verify your email. Please check your connection and try again.");
+            };
+
+            script.src = checkUrl.toString();
+            document.head.appendChild(script);;
         });
 
         document.getElementById("proceedButton").addEventListener("click", function() {
