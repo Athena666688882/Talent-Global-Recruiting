@@ -222,7 +222,7 @@ let userAnswers = {};
 let timeRemaining = 20 * 60;
 let timerInterval;
 let tabSwitchCount = 0;
-let testSubmitted = false; // ← FLAG: prevents double submission
+let testSubmitted = sessionStorage.getItem("testSubmitted") === "true"; // persists across tab switches
 
 document.getElementById("userInfoForm").addEventListener("submit", function(event) {
   event.preventDefault();
@@ -239,6 +239,8 @@ document.getElementById("userInfoForm").addEventListener("submit", function(even
     .then(r => r.json())
     .then(data => {
       if (data.status === "authorized") {
+        sessionStorage.removeItem("testSubmitted"); // reset for new session
+        testSubmitted = false;
         document.getElementById("testConditionsModal").style.display = "flex";
       } else if (data.status === "already_completed") {
         alert("⚠️ This email has already completed the assessment. Each candidate can only take the test once.");
@@ -331,8 +333,9 @@ function saveAnswer() {
 }
 
 function submitTest(mode) {
-  if (testSubmitted) return; // ← BLOCK double submission
-  testSubmitted = true;      // ← SET flag immediately
+  if (testSubmitted) return;
+  testSubmitted = true;
+  sessionStorage.setItem("testSubmitted", "true"); // persist across tab switches
 
   clearInterval(timerInterval);
   document.getElementById("quizContainer").classList.add("hidden");
@@ -434,7 +437,7 @@ function submitTest(mode) {
 
 function setupAntiCheatMeasures() {
   window.addEventListener("blur", () => {
-    if (testSubmitted) return; // ← ignore blur after submission
+    if (testSubmitted) return;
     tabSwitchCount++;
     if (tabSwitchCount === 1) {
       alert("⚠️ We noticed you switched tabs. Please keep the test window open to maintain the integrity of the assessment. If this happens again, your test will be automatically submitted.");
