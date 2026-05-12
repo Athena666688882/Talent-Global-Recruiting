@@ -222,6 +222,7 @@ let userAnswers = {};
 let timeRemaining = 20 * 60;
 let timerInterval;
 let tabSwitchCount = 0;
+let testSubmitted = false; // ← FLAG: prevents double submission
 
 document.getElementById("userInfoForm").addEventListener("submit", function(event) {
   event.preventDefault();
@@ -330,6 +331,9 @@ function saveAnswer() {
 }
 
 function submitTest(mode) {
+  if (testSubmitted) return; // ← BLOCK double submission
+  testSubmitted = true;      // ← SET flag immediately
+
   clearInterval(timerInterval);
   document.getElementById("quizContainer").classList.add("hidden");
   document.getElementById("formContainer").classList.add("hidden");
@@ -430,6 +434,7 @@ function submitTest(mode) {
 
 function setupAntiCheatMeasures() {
   window.addEventListener("blur", () => {
+    if (testSubmitted) return; // ← ignore blur after submission
     tabSwitchCount++;
     if (tabSwitchCount === 1) {
       alert("⚠️ We noticed you switched tabs. Please keep the test window open to maintain the integrity of the assessment. If this happens again, your test will be automatically submitted.");
@@ -440,24 +445,28 @@ function setupAntiCheatMeasures() {
   });
 
   document.addEventListener("copy", (e) => {
+    if (testSubmitted) return;
     e.preventDefault();
     alert("⚠️ For security reasons, copying and pasting is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
     submitTest("auto");
   });
 
   document.addEventListener("cut", (e) => {
+    if (testSubmitted) return;
     e.preventDefault();
     alert("⚠️ For security reasons, cutting is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
     submitTest("auto");
   });
 
   document.addEventListener("contextmenu", (e) => {
+    if (testSubmitted) return;
     e.preventDefault();
     alert("⚠️ For security reasons, right-clicking is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
     submitTest("auto");
   });
 
   window.addEventListener("beforeunload", (e) => {
+    if (testSubmitted) return;
     if (!document.getElementById("quizContainer").classList.contains("hidden")) {
       submitTest("auto");
     }
