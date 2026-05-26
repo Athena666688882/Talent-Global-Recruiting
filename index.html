@@ -244,7 +244,7 @@ document.getElementById("userInfoForm").addEventListener("submit", function(even
         testSubmitted = false;
         document.getElementById("testConditionsModal").style.display = "flex";
       } else if (data.status === "already_completed") {
-        alert("⚠️ This email has already completed the assessment. Each candidate can only take the test once.");
+        alert("We already have a previous submission on file. We will notify the recruiter in charge of your case so they can review your application. We'll reach out as soon as we have any updates.");
       } else if (data.status === "not_authorized") {
         alert("⚠️ This email is not authorized to take the assessment. Please make sure you are using the same email address you provided in your application.");
       } else {
