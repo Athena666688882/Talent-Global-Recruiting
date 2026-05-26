@@ -150,7 +150,7 @@ button:disabled {
 </style>
 </head>
 <body>
-
+ 
 <div class="container" id="formContainer">
   <div class="header">Talent Global Recruitment</div>
   <h2>Enter Your Information</h2>
@@ -163,6 +163,7 @@ button:disabled {
       <li>Second violation: Your test will be automatically submitted.</li>
       <li>Copying, pasting, or right-clicking: Immediate disqualification.</li>
       <li>Your answers will be automatically saved as you progress.</li>
+      <li>This assessment must be completed on a computer. Mobile devices are not supported.</li>
     </ul>
   </div>
   <form id="userInfoForm">
@@ -175,7 +176,7 @@ button:disabled {
     <button type="submit">I Understand & Start Test</button>
   </form>
 </div>
-
+ 
 <div class="container hidden" id="quizContainer">
   <div class="timer" id="timer">Time Remaining: 20:00</div>
   <div class="progress">
@@ -184,12 +185,12 @@ button:disabled {
   <div id="questionContainer"></div>
   <button id="nextButton">Next Question</button>
 </div>
-
+ 
 <div class="container hidden" id="submissionContainer">
   <div class="header">Test Submitted Successfully!</div>
   <div class="submission-message" id="submissionMessage"></div>
 </div>
-
+ 
 <div class="modal" id="testConditionsModal">
   <div class="modal-content">
     <p>The camera and audio will be activated for randomly selected applicants during the test process. You only have one chance to complete the test. If you close the window, your assessment will be automatically submitted.</p>
@@ -199,7 +200,7 @@ button:disabled {
     </div>
   </div>
 </div>
-
+ 
 <script>
 const questions = [
   { q: "The odometer is to mileage as the compass is to:", options: ["Speed", "Hiking", "Needle", "Direction"], correct: "D" },
@@ -216,30 +217,30 @@ const questions = [
   { q: "The entire class is lined up in a row. Anthony is the 15th from the left and also the 15th from the right. How many students are there in total in the class?", options: ["15", "25", "29", "30", "31"], correct: "C" },
   { q: "The length of the train's caboose (rear car) is 6.4 meters; the length of the locomotive equals the length of the caboose plus half the length of a car. The length of a car equals the length of the caboose plus the length of the locomotive. What is the total length of the train's locomotive, car, and caboose?", options: ["25.6m", "36m", "51.2m", "64.4m", "76.2m"], correct: "C" }
 ];
-
+ 
 let currentQuestionIndex = 0;
 let userAnswers = {};
 let timeRemaining = 20 * 60;
 let timerInterval;
 let tabSwitchCount = 0;
-let testSubmitted = sessionStorage.getItem("testSubmitted") === "true"; // persists across tab switches
-
+let testSubmitted = sessionStorage.getItem("testSubmitted") === "true";
+ 
 document.getElementById("userInfoForm").addEventListener("submit", function(event) {
   event.preventDefault();
-
+ 
   const email = document.getElementById("email").value.toLowerCase().trim();
   const checkUrl = "https://script.google.com/macros/s/AKfycbzuJmLA8taI9Jzemwd7IPPR6V0Ah26cJg3Djd4SVbUX2FGPCQor-J9DuqkwCqqYlb0wHg/exec"
     + "?action=check&email=" + encodeURIComponent(email);
-
+ 
   const btn = document.querySelector("#userInfoForm button");
   btn.textContent = "Checking authorization...";
   btn.disabled = true;
-
+ 
   fetch(checkUrl)
     .then(r => r.json())
     .then(data => {
       if (data.status === "authorized") {
-        sessionStorage.removeItem("testSubmitted"); // reset for new session
+        sessionStorage.removeItem("testSubmitted");
         testSubmitted = false;
         document.getElementById("testConditionsModal").style.display = "flex";
       } else if (data.status === "already_completed") {
@@ -258,7 +259,7 @@ document.getElementById("userInfoForm").addEventListener("submit", function(even
       btn.disabled = false;
     });
 });
-
+ 
 document.getElementById("proceedButton").addEventListener("click", function() {
   document.getElementById("testConditionsModal").style.display = "none";
   document.getElementById("formContainer").classList.add("hidden");
@@ -268,12 +269,12 @@ document.getElementById("proceedButton").addEventListener("click", function() {
   updateProgressBar();
   setupAntiCheatMeasures();
 });
-
+ 
 document.getElementById("cancelButton").addEventListener("click", function() {
   document.getElementById("testConditionsModal").style.display = "none";
   submitTest("cancel");
 });
-
+ 
 function startTimer() {
   timerInterval = setInterval(() => {
     timeRemaining--;
@@ -284,13 +285,13 @@ function startTimer() {
     updateTimerDisplay();
   }, 1000);
 }
-
+ 
 function updateTimerDisplay() {
   const minutes = Math.floor(timeRemaining / 60);
   const seconds = timeRemaining % 60;
   document.getElementById("timer").textContent = `Time Remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
-
+ 
 function showQuestion() {
   const questionContainer = document.getElementById("questionContainer");
   const question = questions[currentQuestionIndex];
@@ -309,12 +310,12 @@ function showQuestion() {
   document.getElementById("nextButton").textContent = currentQuestionIndex === questions.length - 1 ? "Submit Test" : "Next Question";
   updateProgressBar();
 }
-
+ 
 function updateProgressBar() {
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
   document.getElementById("progressBar").style.width = `${progress}%`;
 }
-
+ 
 document.getElementById("nextButton").addEventListener("click", function() {
   saveAnswer();
   if (currentQuestionIndex < questions.length - 1) {
@@ -324,27 +325,27 @@ document.getElementById("nextButton").addEventListener("click", function() {
     submitTest("manual");
   }
 });
-
+ 
 function saveAnswer() {
   const selected = document.querySelector(`input[name="q${currentQuestionIndex}"]:checked`);
   if (selected) {
     userAnswers[currentQuestionIndex] = selected.value;
   }
 }
-
+ 
 function submitTest(mode) {
   if (testSubmitted) return;
   testSubmitted = true;
-  sessionStorage.setItem("testSubmitted", "true"); // persist across tab switches
-
+  sessionStorage.setItem("testSubmitted", "true");
+ 
   clearInterval(timerInterval);
   document.getElementById("quizContainer").classList.add("hidden");
   document.getElementById("formContainer").classList.add("hidden");
   document.getElementById("submissionContainer").classList.remove("hidden");
-
+ 
   let score = 0;
   let questionResults = {};
-
+ 
   if (mode !== "cancel") {
     for (let i = 0; i < questions.length; i++) {
       const userAnswer = userAnswers[i];
@@ -361,7 +362,7 @@ function submitTest(mode) {
       questionResults[`Q${i + 1}`] = "Wrong";
     }
   }
-
+ 
   const formData = {
     name: document.getElementById("name").value,
     email: document.getElementById("email").value,
@@ -381,7 +382,7 @@ function submitTest(mode) {
     Q12: questionResults.Q12 || "Wrong",
     Q13: questionResults.Q13 || "Wrong"
   };
-
+ 
   const url = new URL("https://script.google.com/macros/s/AKfycbwM3WOt5UdpA3FneouI8QZ3EfFER-ExKYUXmfcWSkkGLjQWD0QeK4P4PNqGjsCcZfUE/exec");
   url.searchParams.append("name", formData.name);
   url.searchParams.append("email", formData.email);
@@ -400,7 +401,7 @@ function submitTest(mode) {
   url.searchParams.append("Q11", formData.Q11);
   url.searchParams.append("Q12", formData.Q12);
   url.searchParams.append("Q13", formData.Q13);
-
+ 
   fetch(url, { method: "GET" })
     .then(response => response.json())
     .then(data => {
@@ -413,7 +414,7 @@ function submitTest(mode) {
     .catch(error => {
       console.error("Fetch error:", error);
     });
-
+ 
   let submissionMessage = "";
   if (mode === "manual") {
     submissionMessage = `
@@ -431,10 +432,10 @@ function submitTest(mode) {
       <p>Thank you for your interest in Talent Global Recruitment.</p>
     `;
   }
-
+ 
   document.getElementById("submissionMessage").innerHTML = submissionMessage;
 }
-
+ 
 function setupAntiCheatMeasures() {
   window.addEventListener("blur", () => {
     if (testSubmitted) return;
@@ -446,28 +447,21 @@ function setupAntiCheatMeasures() {
       submitTest("auto");
     }
   });
-
+ 
   document.addEventListener("copy", (e) => {
     if (testSubmitted) return;
     e.preventDefault();
     alert("⚠️ For security reasons, copying and pasting is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
     submitTest("auto");
   });
-
+ 
   document.addEventListener("cut", (e) => {
     if (testSubmitted) return;
     e.preventDefault();
     alert("⚠️ For security reasons, cutting is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
     submitTest("auto");
   });
-
-  document.addEventListener("contextmenu", (e) => {
-    if (testSubmitted) return;
-    e.preventDefault();
-    alert("⚠️ For security reasons, right-clicking is not allowed during the assessment. Unfortunately, this means your test session has ended. Thank you for your understanding.");
-    submitTest("auto");
-  });
-
+ 
   window.addEventListener("beforeunload", (e) => {
     if (testSubmitted) return;
     if (!document.getElementById("quizContainer").classList.contains("hidden")) {
@@ -479,3 +473,4 @@ function setupAntiCheatMeasures() {
 </script>
 </body>
 </html>
+ 
