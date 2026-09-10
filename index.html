@@ -209,7 +209,7 @@ button:disabled {
 <div class="container" id="formContainer">
   <div class="header">Talent Global Recruitment</div>
   <h2>Enter Your Information</h2>
-  <p>There are 13 questions, and you have 20 minutes to complete the test. You can't go back to change your answers.</p>
+  <p>There are 13 questions, and you have 15 minutes to complete the test. You can't go back to change your answers.</p>
   <div class="rules">
     <div class="rules-header">⚠️ IMPORTANT:</div>
     <ul class="rules-list">
@@ -235,7 +235,7 @@ button:disabled {
 </div>
 
 <div class="container hidden" id="quizContainer">
-  <div class="timer" id="timer">Time Remaining: 20:00</div>
+  <div class="timer" id="timer">Time Remaining: 15:00</div>
   <div class="progress">
     <div class="progress-bar" id="progressBar"></div>
   </div>
@@ -277,7 +277,7 @@ const questions = [
 
 let currentQuestionIndex = 0;
 let userAnswers = {};
-let timeRemaining = 20 * 60;
+let timeRemaining = 15 * 60;
 let timerInterval;
 let tabSwitchCount = 0;
 let testSubmitted = sessionStorage.getItem("testSubmitted") === "true";
